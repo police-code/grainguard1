@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.i18nexus.com/i18next/20.3.0/i18next.min.js"></script>
+    <link rel="stylesheet" href="dashboard.css">
+    <title>Dashboard - GrainGuard</title>
+    <style>
+        /* CSS content remains unchanged */
+        #canvas-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+        .uploaded-image-container {
+            position: relative;
+            display: inline-block;
+        }
+        .scan-history-container {
+            margin-top: 20px;
+            display: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal.fade-out {
+    animation: fadeOut 0.3s ease-in-out forwards; /* Fade-out animation */
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.modal-content {
+    background-color: #fefefe;
+    border-radius: 20px;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid limegreen;
+    width: 80%;
+    position: relative;
+}
+
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    color: #aaa;
+    transition: color 0.2s ease;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#modal-content-area {
+    line-height: 1.6;
+}
+
+/* Example of how the alert list could be styled */
+.alert-list {
+  list-style: none;
+  padding: 0;
+}
+
+.alert-list li {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.alert-message {
+  font-weight: 500;
+}
+
+.alert-date {
+  color: #888;
+  font-size: 0.9em;
+}
+
+.high-alert {
+  background-color: #ffe0e0; /* Light red for high alerts */
+}
+
+.normal-alert {
+  background-color: #f9f9f9;
+}
+
+.profile-details {
+  padding: 15px;
+}
+
+.profile-details p {
+  margin-bottom: 10px;
+}
+
+.profile-details strong {
+  font-weight: 600;
+  margin-right: 5px;
+}
+
+#weevil-result, #moisture-result {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.model-selection {
+    position: absolute; /* Allows for precise positioning */
+    top: 10px; /* Adjust as needed */
+    right: 10px; /* Adjust as needed */
+    display: flex; /* Aligns label and select horizontally */
+    align-items: center; /* Vertically aligns label and select */
+    background-color: darkgreen; /* Optional: Add background color */
+    padding: 10px; /* Optional: Add padding */
+    border-radius: 5px; /* Optional: Add rounded corners */
+    border: 1px solid #ddd; /* Optional: Add a border */
+}
+
+.model-selection label {
+    margin-right: 10px; /* Spacing between label and select */
+    font-weight: bold; /* Make the label bold */
+}
+
+.model-selection select {
+    padding: 5px; /* Padding inside the select box */
+    border: 1px solid #ccc; /* Border for the select box */
+    border-radius: 3px; /* Rounded corners for the select box */
+    font-size: 14px; /* Adjust font size */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    border-radius: 10px;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 800px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content h2 {
+    margin-bottom: 20px;
+    color: darkgreen;
+    text-align: center;
+}
+
+.modal-content ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    margin-bottom: 20px;
+    max-width: 600px; /* Limit width of list */
+    margin: 20px auto; /* Center the list */
+    text-align: left; /* Ensure list items align left */
+}
+
+.modal-content li {
+    margin-bottom: 10px;
+    color: black;
+    line-height: 1.6; /* Improve line spacing for readability */
+}
+
+#tips-model-select {
+    display: block;
+    margin: 20px auto;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 250px;
+    font-size: 16px;
+    background-color: white;
+}
+
+#tips-list {
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f5f5f5
+  margin: 20px auto;
+  max-width: 700px;
+}
+
+#tips-list li {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+#tips-list li:last-child {
+  border-bottom: none;
+}
+
+.modal-content h2 {
+    font-weight: bold; /* Make heading bold */
+    margin-bottom: 20px;
+    color: darkgreen;
+    text-align: center;
+}
+
+@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #moisture-result {
+    margin-top: 20px;
+    padding: 15px; /* Increase padding for better spacing */
+    border: 1px solid #ddd;
+    font-size: 20px; /* Increase font size */
+    font-weight: bold; /* Make the text bold */
+    /* Optional: Add more styles for readability */
+    line-height: 1.5; /* Adjust line spacing */
+    text-align: center; /* Center the text */
+    background-color: #f9f9f9; /* Add a subtle background color */
+    border-radius: 5px; /* Add rounded corners */
+}
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h2>GrainGuard Dashboard</h2>
+        <div class="model-selection">
+        <label for="model-select">Select Model:</label>
+        <select id="model-select">
+            <option value="weevil">Weevil Detection</option>
+            <option value="moisture">Moisture Detection</option>
+        </select>
+    </div>
+
+            <button class="premium-btn" onclick="window.location.href='payment.html'">Upgrade to Premium</button>
+            <ul>
+                <li id="homeBtn"><a href="#">Home</a></li>
+                <li id="scanHistoryBtn"><a href="#">Scan History</a></li>
+                   <li class="modal-trigger" data-modal="alerts"><a href="#">Alerts</a></li>
+            <li class="modal-trigger" data-modal="tips"><a href="#">Post-Harvest Tips</a></li>
+            <li class="modal-trigger" data-modal="batch"><a href="#">Batch Tracking</a></li>
+            <li class="modal-trigger" data-modal="profile"><a href="#">Profile</a></li>
+            <li class="modal-trigger" data-modal="settings"><a href="#">Settings</a></li>
+            <li class="modal-trigger" data-modal="logout"><a href="#">Logout</a></li>
+            </ul>
+        </aside>
+
+        <div class="main-content">
+            <h1 id="welcome-message">Welcome</h1>
+ <!-- Scan History Table -->
+            <div class="scan-history-container" id="scanHistoryContainer" style="display: none;">
+                <h2>Scan History</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Result</th>
+                            <th>Moisture Level</th>
+                            <th>Weevil Infestation</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scan-history">
+                        <tr><td colspan="4">Loading scan history...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+         <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modal-content-area">
+                </div>
+        </div>
+    </div>
+        
+           <!-- Camera functionality card -->
+    <div class="card" id="camera-card">
+                <button id="enable-camera">Scan now</button>
+                <video id="camera-stream" width="100%" height="auto" style="display: none;" autoplay></video>
+                <button id="capture-image" style="display: none;">Capture Image</button>
+            </div>
+
+            <!-- Upload image card -->
+            <div class="card" id="upload-card">
+                <input type="file" id="upload-image" accept="image/*" style="margin-top: 20px;">
+            </div>
+
+            <div id="loading-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.8); z-index: 1000; text-align: center; padding-top: 20%;">
+        <img src="images/logo.jpg" alt="Loading..." style="width: 100px; animation: spin 2s linear infinite;">
+        <p>Loading...</p>
+    </div>
+            
+            <div class="uploaded-image-container" id="uploaded-image-container">
+                <img id="uploaded-image" alt="Uploaded Image">
+                <canvas id="canvas-overlay"></canvas>
+            </div>
+
+            <div id="weevil-result" style="display: none;"></div>
+    <div id="moisture-result" style="display: none;"></div>
+
+
+            <div class="action-buttons">
+                <div class="card">
+                    <button id="download-btn">Download Annotated Image</button>
+                </div>
+                <div class="card">
+                    <button id="share-btn">Share Results</button>
+                </div>
+            </div>
+
+            <div id="result" class="result">Take/Upload an image to analyze...</div>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; 2025 GrainGuard. All rights reserved.</p>
+         <p> Powered by GuardTech.</p>
+    </footer>
+    <script>
+
+        document.getElementById('homeBtn').addEventListener('click', function (event) {
+    event.preventDefault(); // Prevent default link behavior
+    location.reload(); // Reload the page
+});
+
+const modal = document.getElementById("myModal");
+const modalContentArea = document.getElementById("modal-content-area");
+const triggers = document.querySelectorAll(".modal-trigger");
+const closeBtn = document.querySelector(".close");
+
+triggers.forEach(trigger => {
+    trigger.addEventListener("click", () => {
+        const modalType = trigger.getAttribute("data-modal");
+        loadModalContent(modalType);
+        modal.style.display = "block";
+    });
+});
+
+closeBtn.addEventListener("click", () => {
+    modal.style.display = "none";
+});
+
+window.addEventListener("click", (event) => {
+    if (event.target === modal) {
+        modal.style.display = "none";
+    }
+});
+
+async function loadModalContent(modalType) {
+    let content = "";
+    const postHarvestTips = {
+        "Weevil Detection": [
+            "Store grains in airtight containers.",
+            "Maintain a cool and dry environment.",
+            "Regularly inspect stored grains for signs of infestation.",
+            "Consider using insect traps or repellents."
+        ],
+        "Moisture Detection": [
+            "Properly dry grains after harvest to reduce moisture content.",
+            "Store grains in well-ventilated areas.",
+            "Monitor moisture levels regularly.",
+            "Consider using moisture absorbers."
+        ],
+        "General": [
+            "Clean storage areas thoroughly before storing new grains.",
+            "Keep records of storage conditions and inspections.",
+            "Rotate grain stocks to prevent prolonged storage."
+        ]
+    };
+
+    try {
+        switch (modalType) {
+            case "alerts":
+                content = await loadAlertsContent();
+                break;
+            case "profile":
+                content = await loadProfileContent();
+                break;
+            case "tips":
+                content = await loadTipsContent(postHarvestTips);
+                break;
+            case "batch":
+                content = "<h2>Batch Tracking</h2><p>Track your batch history...</p>";
+                break;
+            case "settings":
+                content = "<h2>Settings</h2><p>Configure your account settings...</p>";
+                break;
+            case "logout":
+                content = `<h2>Logout</h2>
+                           <p>Are you sure you want to logout?</p>
+                               <button id="logoutButton" type="button">Logout</button>
+                           </form>`;
+                break;
+                default:
+                content = "<p>Content not found.</p>";
+        }
+    } catch (error) {
+        console.error("Error loading modal content:", error);
+        content = `<p>Error: ${error.message}</p>`;
+    }
+   
+    modalContentArea.innerHTML = content;
+     if (modalType === "logout") {
+    requestAnimationFrame(() => {
+        const logoutButton = document.getElementById('logoutButton');
+        if (logoutButton) {
+            console.log("Logout button found, adding event listener"); // Debugging
+            logoutButton.addEventListener('click', performLogout);
+        } else {
+            console.error('Logout button not found in modal content.');
+        }
+    });
+}
+
+    async function performLogout() {
+    try {
+        const response = await fetch('https://localhost:5000/api/logout', {
+            method: 'POST',
+            credentials: 'include' // Ensures cookies are sent
+        });
+
+        if (response.ok) { // Checks if status is 200 or 204
+            console.log('Logged out successfully');
+            localStorage.removeItem('userName'); // Clear user session data
+            window.location.href = 'login.html'; // Redirect to login
+        } else {
+            console.error('Logout failed:', response.status);
+            alert('Logout failed. Please try again.');
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+        alert('An error occurred during logout. Please try again later.');
+    }
+}
+
+
+    if (modalType === "tips") {
+        setupTipsEventListeners(postHarvestTips);
+    }
+}
+
+async function loadAlertsContent() {
+    try {
+        const alertsResponse = await fetch('/api/user/alerts');
+        if (!alertsResponse.ok) throw new Error('Failed to fetch alerts.');
+        const alertsData = await alertsResponse.json();
+        let content = "<h2>Alerts</h2><ul class='alert-list'>";
+        alertsData.forEach(alert => {
+            const alertType = alert.severity === 'high' ? 'high-alert' : 'normal-alert';
+            content += `<li class="${alertType}">
+                            <span class="alert-message">${alert.message}</span>
+                            <span class="alert-date">${new Date(alert.timestamp).toLocaleString()}</span>
+                        </li>`;
+        });
+        return content + "</ul>";
+    } catch (error) {
+        console.error("Error loading alerts:", error);
+        return `<p>Error: ${error.message}</p>`;
+    }
+}
+
+async function loadProfileContent() {
+    try {
+        const profileResponse = await fetch('/api/user/profile');
+        if (!profileResponse.ok) throw new Error('Failed to fetch profile.');
+        const profileData = await profileResponse.json();
+        return `<h2>Profile</h2>
+                <div class="profile-details">
+                    <p><strong>Username:</strong> ${profileData.username}</p>
+                    <p><strong>Email:</strong> ${profileData.email}</p>
+                    <p><strong>Joined:</strong> ${new Date(profileData.joined_date).toLocaleDateString()}</p>
+                </div>`;
+    } catch (error) {
+        console.error("Error loading profile:", error);
+        return `<p>Error: ${error.message}</p>`;
+    }
+}
+
+async function loadTipsContent(postHarvestTips) {
+    let content = "<h2>Post-Harvest Handling Tips</h2>";
+    content += `<select id="tips-model-select">
+                    <option value="Weevil Detection">Weevil Detection</option>
+                    <option value="Moisture Detection">Moisture Detection</option>
+                    <option value="General">General</option>
+                </select>`;
+    content += "<ul id='tips-list'></ul>";
+    return content;
+}
+
+function setupTipsEventListeners(postHarvestTips) {
+    const select = document.getElementById("tips-model-select");
+    const tipsList = document.getElementById('tips-list');
+
+    function populateTipsList(selectedTips) {
+        tipsList.innerHTML = "";
+        selectedTips.forEach(tip => {
+            tipsList.innerHTML += `<li>${tip}</li>`;
+        });
+    }
+
+    select.addEventListener('change', function () {
+        const selectedTips = postHarvestTips[this.value];
+        populateTipsList(selectedTips);
+    });
+
+    populateTipsList(postHarvestTips[select.value]);
+
+    async function performLogout() {
+    try {
+        const response = await fetch('/api/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrfToken // Ensure csrfToken is correctly populated
+            }
+        });
+
+        if (response.status === 204) {
+            console.log('Logged out successfully');
+            localStorage.removeItem('username'); // Clear local storage
+            localStorage.removeItem('userId');
+            modal.style.display = 'none'; // Close the modal
+            window.location.href = 'login.html'; // Redirect to login
+        } else {
+            console.error('Logout failed');
+            alert('Logout failed. Please try again.'); // Display error message
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+        alert('An error occurred during logout. Please try again later.'); // Display error message
+    }
+}
+}
+document.getElementById('scanHistoryBtn').addEventListener('click', function (event) {
+    event.preventDefault();
+
+
+    // Hide all cards
+    document.querySelectorAll('.card').forEach(card => {
+        card.style.display = 'none';
+    });
+
+fetch('https://localhost:5000/check-session', {
+    method: 'GET',
+    credentials: 'include' // Ensures cookies are sent
+})
+.then(response => response.json())
+.then(data => {
+    console.log("Session Data:", data);
+    if (!data.user) {
+        window.location.href = "login.html"; // Redirect to login if session is missing
+    }
+})
+.catch(error => console.error('Session error:', error));
+
+
+
+    // Show scan history container
+    const scanHistoryContainer = document.getElementById('scanHistoryContainer');
+    scanHistoryContainer.style.display = 'block';
+});
+
+
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const response = await fetch('https://localhost:5000/check-session', {
+            method: 'GET',
+            credentials: 'include' // Ensures cookies are sent
+        });
+
+        const data = await response.json();
+        const welcomeMessage = document.getElementById('welcomeMessage');
+
+        if (data.user) {
+            welcomeMessage.textContent = `Welcome, ${data.user.username}!`;
+        } else {
+            welcomeMessage.textContent = "Welcome!";
+            console.warn("No user found in session.");
+        }
+    } catch (error) {
+        console.error("Error fetching session:", error);
+    }
+});
+
+
+async function fetchScanHistory() {
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+
+    try {
+        const response = await fetch(`/api/scan-history`, {
+            method: 'GET',
+            credentials: 'include', // Ensures cookies/session are sent
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await response.json();
+        const tableBody = document.getElementById('scan-history');
+        tableBody.innerHTML = '';
+
+        if (data.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="4">No scan history available.</td></tr>';
+            return;
+        }
+
+        data.forEach(scan => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${scan.scan_date}</td>
+                <td>${scan.scan_result}</td>
+                <td>${scan.moisture_level}</td>
+                <td>${scan.detected_issues}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+    } catch (error) {
+        console.error("Error fetching scan history:", error);
+        document.getElementById('scan-history').innerHTML = '<tr><td colspan="4">Error loading scan history.</td></tr>';
+    }
+}
+
+const uploadImageInput = document.getElementById("upload-image");
+const uploadedImage = document.getElementById("uploaded-image");
+const canvasOverlay = document.getElementById("canvas-overlay");
+const resultDiv = document.getElementById("result");
+const spinner = document.getElementById("loading-spinner");
+const cameraStream = document.getElementById("camera-stream");
+const enableCameraButton = document.getElementById("enable-camera");
+const captureImageButton = document.getElementById("capture-image");
+const modelSelect = document.getElementById('model-select');
+const weevilResultDiv = document.getElementById('weevil-result');
+const moistureResultDiv = document.getElementById('moisture-result');
+
+const ROBOFLOW_API_URL = "https://detect.roboflow.com/grainguard/1";
+const API_KEY = "GFC3cHrlownthYDBynj6";
+
+let storedImageData; // Global variable to store image data
+
+async function classifyImage() {
+    if (!storedImageData) {
+        console.error("No image data stored.");
+        return;
+    }
+
+    document.getElementById("loading-overlay").style.display = "block";
+
+    const selectedModel = modelSelect.value;
+    const ctx = canvasOverlay.getContext("2d");
+    ctx.clearRect(0, 0, canvasOverlay.width, canvasOverlay.height);
+    uploadedImage.src = storedImageData; // Set uploadedImage.src here
+
+try {
+    if (selectedModel === 'weevil') {
+        weevilResultDiv.style.display = 'block';
+        moistureResultDiv.style.display = 'none';
+        await analyzeWeevil(storedImageData);
+    } else if (selectedModel === 'moisture') {
+        weevilResultDiv.style.display = 'none';
+        moistureResultDiv.style.display = 'block';
+        await analyzeMoisture(storedImageData);
+       }
+    }catch(error){
+        console.error("Error during image analysis:", error);
+        resultDiv.innerText = "An error occurred during analysis."; // Display error message
+    } finally {
+        document.getElementById("loading-overlay").style.display = "none";
+    }
+
+    resultDiv.innerText = ""; 
+}
+
+async function analyzeWeevil(image) {
+    let weevilResult = "";
+    try {
+        const formData = new FormData();
+        formData.append("file", image);
+
+        const response = await fetch(`${ROBOFLOW_API_URL}?api_key=${API_KEY}`, {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!response.ok) throw new Error("Failed to connect to the API");
+
+        const data = await response.json();
+
+        if (data.predictions.length > 0) {
+            drawAnnotations(data.predictions);
+            weevilResult = `Detected ${data.predictions.length} objects. Check the image for details.`;
+        } else {
+            weevilResult = "No detections were made.";
+        }
+    } catch (error) {
+        console.error("Error with Roboflow API:", error);
+        weevilResult = "Error processing the image.";
+    }
+    weevilResultDiv.innerHTML = weevilResult;
+document.getElementById("loading-overlay").style.display = "none";
+}
+
+async function analyzeMoisture(image) {
+    let moistureResultDiv = document.getElementById("moisture-result");
+      document.getElementById("loading-overlay").style.display = "block";
+      moistureResultDiv.style.display = "none";
+      
+    try {
+        // Get a predefined scenario instead of random values
+          const simulatedData = getPredefinedScenario();
+          const moistureLevel = simulatedData.moistureLevel;
+          const moistureArea = { x: image.width / 4, y: image.height / 4, w: image.width / 2, h: image.height / 2 };
+          
+
+        drawMoistureArea(moistureArea, moistureLevel);
+
+        // Animate moisture level display
+          animateMoistureDisplay(moistureLevel);
+      } catch (error) {
+          console.error("Error with Moisture API:", error);
+          moistureResultDiv.innerHTML = "Error processing the image.";
+      }
+      
+      document.getElementById("loading-overlay").style.display = "none";
+      moistureResultDiv.style.display = "block";
+  }
+  
+  function getPredefinedScenario() {
+      const scenarios = [
+          { moistureLevel: 15, description: "Safe Condition" },
+          { moistureLevel: 30, description: "Warning: Moderate Moisture" },
+          { moistureLevel: 45, description: "Danger: High Moisture" }
+      ];
+      return scenarios[Math.floor(Math.random() * scenarios.length)];
+  }
+  
+  function animateMoistureDisplay(finalMoisture) {
+      let moistureResultDiv = document.getElementById("moisture-result");
+      let currentMoisture = 0;
+      let interval = setInterval(() => {
+          if (currentMoisture >= finalMoisture) {
+              clearInterval(interval);
+          } else {
+              currentMoisture += 1;
+              moistureResultDiv.innerHTML = `Moisture Level: ${currentMoisture}%.`;
+          }
+      }, 50); // Smooth transition over ~2 seconds
+  }
+  
+  function drawMoistureArea(area, level) {
+      console.log(`Drawing moisture area at (${area.x}, ${area.y}) with level ${level}%`);
+      // Implement visualization if needed
+  }
+function drawAnnotations(predictions) {
+    const ctx = canvasOverlay.getContext("2d");
+    ctx.clearRect(0, 0, canvasOverlay.width, canvasOverlay.height);
+
+    predictions.forEach(prediction => {
+        const { x, y, width, height, class: label, confidence } = prediction;
+
+        const scaleX = uploadedImage.width / uploadedImage.naturalWidth;
+        const scaleY = uploadedImage.height / uploadedImage.naturalHeight;
+
+        const rectX = (x - width / 2) * scaleX;
+        const rectY = (y - height / 2) * scaleY;
+        const rectWidth = width * scaleX;
+        const rectHeight = height * scaleY;
+
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(rectX, rectY, rectWidth, rectHeight);
+
+        ctx.font = "14px Arial";
+        ctx.fillStyle = "red";
+        ctx.fillText(`${label} (${(confidence * 100).toFixed(1)}%)`, rectX, rectY - 5);
+    });
+}
+
+        uploadImageInput.addEventListener("change", async (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    storedImageData = e.target.result; // Store data URL
+                    uploadedImage.src = storedImageData; //Set image source.
+            uploadedImage.onload = () => {
+                canvasOverlay.width = uploadedImage.width;
+                canvasOverlay.height = uploadedImage.height;
+            };
+            classifyImage(); // Call classifyImage without parameter
+             };
+
+                reader.readAsDataURL(file);
+                document.getElementById('camera-card').style.display = 'none';
+                document.getElementById('upload-card').style.display = 'none';
+            }
+        });
+
+        enableCameraButton.addEventListener("click", async () => {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                cameraStream.srcObject = stream;
+                cameraStream.style.display = "block";
+                enableCameraButton.style.display = "none";
+                captureImageButton.style.display = "block";
+            } else {
+                alert("Camera access is not supported on this device.");
+            }
+        });
+
+        captureImageButton.addEventListener("click", async () => {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+
+            canvas.width = cameraStream.videoWidth;
+            canvas.height = cameraStream.videoHeight;
+            ctx.drawImage(cameraStream, 0, 0, canvas.width, canvas.height);
+            storedImageData = canvas.toDataURL("image/png"); // Store data URL
+    
+// Stop the camera stream and hide the video element
+    const stream = cameraStream.srcObject;
+    const tracks = stream.getTracks();
+    tracks.forEach(track => track.stop());
+    cameraStream.style.display = "none";
+
+
+            uploadedImage.src = storedImageData; //Set image source.
+            uploadedImage.style.display = "block";
+
+            captureImageButton.style.display = "none";
+    enableCameraButton.style.display = "block";
+
+
+            document.getElementById('camera-card').style.display = 'none';
+            document.getElementById('upload-card').style.display = 'none';
+
+    classifyImage(); // Call classifyImage without parameter
+});
+
+        modelSelect.addEventListener("change", classifyImage);
+
+        function dataURLtoFile(dataURL, filename) {
+            const arr = dataURL.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new File([u8arr], filename, { type: mime });
+        }
+
+        // Download button functionality
+        document.getElementById("download-btn").addEventListener("click", () => {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+
+            canvas.width = uploadedImage.width;
+            canvas.height = uploadedImage.height;
+            ctx.drawImage(uploadedImage, 0, 0, canvas.width, canvas.height);
+
+            // Draw bounding boxes on the canvas
+            const predictions = getPredictionsForDownload(); // Replace with actual function to fetch predictions
+            predictions.forEach(prediction => {
+                const { x, y, width, height, class: label, confidence } = prediction;
+
+                const scaleX = uploadedImage.width / uploadedImage.naturalWidth;
+                const scaleY = uploadedImage.height / uploadedImage.naturalHeight;
+
+                const rectX = (x - width / 2) * scaleX;
+                const rectY = (y - height / 2) * scaleY;
+                const rectWidth = width * scaleX;
+                const rectHeight = height * scaleY;
+
+                ctx.strokeStyle = "red";
+                ctx.lineWidth = 2;
+                ctx.strokeRect(rectX, rectY, rectWidth, rectHeight);
+
+                ctx.font = "14px Arial";
+                ctx.fillStyle = "red";
+                ctx.fillText(`${label} (${(confidence * 100).toFixed(1)}%)`, rectX, rectY - 5);
+            });
+
+            // Download the annotated image
+            const link = document.createElement("a");
+            link.href = canvas.toDataURL("image/png");
+            link.download = "annotated-image.png";
+            link.click();
+        });
+
+        // Share button functionality
+        document.getElementById("share-btn").addEventListener("click", async () => {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+
+            canvas.width = uploadedImage.width;
+            canvas.height = uploadedImage.height;
+            ctx.drawImage(uploadedImage, 0, 0, canvas.width, canvas.height);
+
+            // Draw bounding boxes on the canvas
+            const predictions = getPredictionsForDownload(); // Replace with actual function to fetch predictions
+            predictions.forEach(prediction => {
+                const { x, y, width, height, class: label, confidence } = prediction;
+
+                const scaleX = uploadedImage.width / uploadedImage.naturalWidth;
+                const scaleY = uploadedImage.height / uploadedImage.naturalHeight;
+
+                const rectX = (x - width / 2) * scaleX;
+                const rectY = (y - height / 2) * scaleY;
+                const rectWidth = width * scaleX;
+                const rectHeight = height * scaleY;
+
+                ctx.strokeStyle = "red";
+                ctx.lineWidth = 2;
+                ctx.strokeRect(rectX, rectY, rectWidth, rectHeight);
+
+                ctx.font = "14px Arial";
+                ctx.fillStyle = "red";
+                ctx.fillText(`${label} (${(confidence * 100).toFixed(1)}%)`, rectX, rectY - 5);
+            });
+
+            // Use the Web Share API to share the image if available
+            if (navigator.canShare && navigator.canShare({ files: [new File([canvas.toDataURL("image/png")], "annotated-image.png")] })) {
+                await navigator.share({
+                    files: [new File([canvas.toDataURL("image/png")], "annotated-image.png")],
+                    title: "GrainGuard - Annotated Image",
+                    text: "Check out this annotated image of grain with detected issues.",
+                });
+            } else {
+                alert("Sharing is not supported on your device.");
+            }
+        });
+
+        function getPredictionsForDownload() {
+            // Return mock predictions for download. Replace with actual logic for fetching predictions.
+            return [
+                { x: 100, y: 100, width: 50, height: 50, class: "Weevil", confidence: 0.9 },
+                { x: 200, y: 150, width: 40, height: 40, class: "Mold", confidence: 0.8 },
+            ];
+        }
+    </script>
+</body>
+</html>
