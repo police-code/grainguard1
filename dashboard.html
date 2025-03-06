@@ -834,16 +834,23 @@ function drawAnnotations(predictions) {
         });
 
         enableCameraButton.addEventListener("click", async () => {
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                cameraStream.srcObject = stream;
-                cameraStream.style.display = "block";
-                enableCameraButton.style.display = "none";
-                captureImageButton.style.display = "block";
-            } else {
-                alert("Camera access is not supported on this device.");
-            }
-        });
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment" } // Use "environment" for back camera
+            });
+            cameraStream.srcObject = stream;
+            cameraStream.style.display = "block";
+            enableCameraButton.style.display = "none";
+            captureImageButton.style.display = "block";
+        } catch (error) {
+            alert("Failed to access camera. Please check permissions.");
+            console.error("Error accessing camera:", error);
+        }
+    } else {
+        alert("Camera access is not supported on this device.");
+    }
+});
 
         captureImageButton.addEventListener("click", async () => {
             const canvas = document.createElement("canvas");
