@@ -70,7 +70,7 @@
 
         .image-section {
             flex: 1;
-            background: url('images/login image.avif') no-repeat center;
+            background: url('/login image.avif') no-repeat center;
             background-size: cover;
             min-height: 400px;
         }
