@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pay with MTN Mobile Money</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+        }
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        input, button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pay with Mobile Money</h1>
+    <form id="paymentForm">
+        <input type="email" id="email" placeholder="Enter your email" required>
+        <input type="text" id="phone" placeholder="Enter your phone number" required>
+        <input type="number" id="amount" placeholder="Enter amount (in GHS)" required>
+        <button type="submit">Pay Now</button>
+    </form>
+
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <script>
+        document.getElementById('paymentForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const amount = parseFloat(document.getElementById('amount').value);
+
+            // Validate input
+            if (!email || !phone || isNaN(amount) || amount <= 0) {
+                alert("Please provide valid input for all fields.");
+                return;
+            }
+
+            // Convert amount to kobo (Paystack expects amounts in kobo)
+            const amountInKobo = amount * 100;
+
+            // Initialize Paystack payment
+            const handler = PaystackPop.setup({
+                key: 'pk_test_7a1ea58d83ac8d1a6957889a23775ddbb4b0ae71', // Replace with your Paystack public key
+                email: email,
+                amount: amountInKobo,
+                currency: 'GHS',
+                channels: ['mobile_money'], // Enable mobile money payments
+                metadata: {
+                    custom_fields: [
+                        {
+                            display_name: "Phone Number",
+                            variable_name: "phone_number",
+                            value: phone
+                        }
+                    ]
+                },
+                callback: function(response) {
+                    // Handle successful payment
+                    alert('Payment successful! Transaction reference: ' + response.reference);
+
+                    // Optionally, send the reference to your server for verification
+                    fetch('/verify-payment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ reference: response.reference })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert('Payment verified successfully!');
+                        } else {
+                            alert('Payment verification failed. Please contact support.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Verification error:', error);
+                        alert('An error occurred while verifying the payment.');
+                    });
+                },
+                onClose: function() {
+                    alert('Payment was canceled.');
+                }
+            });
+
+            handler.openIframe();
+        });
+    </script>
+</body>
+</html>

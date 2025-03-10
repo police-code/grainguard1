@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6A994E, #A7C957, #386641);
+            overflow: hidden;
+        }
+
+        .background-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+        }
+
+        .circle.one {
+            width: 150px;
+            height: 150px;
+            top: 10%;
+            left: 15%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .circle.one img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .circle.two {
+            width: 200px;
+            height: 200px;
+            bottom: 10%;
+            right: 15%;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .login-container {
+            display: flex;
+            width: 80%;
+            max-width: 1000px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .image-section {
+            flex: 1;
+            background: url('images/login image.avif') no-repeat center;
+            background-size: cover;
+            min-height: 400px;
+        }
+
+        .form-section {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            color: black;
+        }
+
+        .form-section h2 {
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .form-section input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            background: rgba(255, 255, 255, 0.3);
+            color: black;
+            outline: none;
+        }
+
+        .form-section button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(90deg, #8FBC8F, #2E7D32);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .form-section button:hover {
+            transform: scale(1.05);
+            background: linear-gradient(90deg, #2E7D32, #8FBC8F);
+        }
+
+        .form-section .links {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: black;
+        }
+
+        .form-section .links a {
+            color: darkred;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .form-section .links a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: red;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                flex-direction: column;
+                width: 90%;
+            }
+
+            .image-section {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-elements">
+        <div class="circle one"><img src="images/logo.jpg" alt="Logo"></div>
+        <div class="circle two"></div>
+    </div>
+    <div class="login-container">
+        <div class="image-section"></div>
+        <div class="form-section">
+            <h2>Sign-up</h2>
+            <form id="signupForm" onsubmit="handleSignup(event)">
+                <label for="signupUsername">Username:</label>
+                <input type="text" id="signupUsername" name="signupUsername" required placeholder="Enter username">
+                <label for="signupEmail">Email:</label>
+                <input type="email" id="signupEmail" name="signupEmail" required placeholder="Enter Email">
+                <label for="signupPassword">Password:</label>
+                <input type="password" id="signupPassword" name="signupPassword" required placeholder="Enter password">
+                <button type="submit">Sign Up</button>
+                <div id="signupMessage"></div>
+            <div class="form-switch">
+                Already have an account? <a href="login.html">Log In</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        async function handleSignup(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('signupEmail').value;
+            const username = document.getElementById('signupUsername').value;
+            const password = document.getElementById('signupPassword').value;
+            const signupMessageDiv = document.getElementById('signupMessage');
+
+            if (!email || !username || !password) {
+                signupMessageDiv.textContent = "Please fill in all fields.";
+                signupMessageDiv.className = "message error";
+                return;
+            }
+
+            try {
+                const response = await fetch('https://localhost:5000/api/signup', { // Corrected URL
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, username, password }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    signupMessageDiv.textContent = "Signup successful! Redirecting to login...";
+                    signupMessageDiv.className = "message success";
+                    document.getElementById('signupForm').reset();
+                    setTimeout(() => {
+                        window.location.href = "login.html";
+                    }, 2000);
+                } else {
+                    signupMessageDiv.textContent = data.error || "Signup failed.";
+                    signupMessageDiv.className = "message error";
+                }
+            } catch (error) {
+                console.error("Fetch error:", error);
+                signupMessageDiv.textContent = "A network error occurred.";
+                signupMessageDiv.className = "message error";
+            }
+        }
+    </script>
+</body>
+</html>

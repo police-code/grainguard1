@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Page</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: revert-layer;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .payment-container {
+      background-color: #ffffff;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 500px;
+    }
+
+    .payment-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .payment-header h2 {
+      font-size: 2rem;
+      color: #343a40;
+    }
+
+    .payment-header p {
+      font-size: 1rem;
+      color: #6c757d;
+    }
+
+    .payment-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .payment-option {
+      background-color: #e9ecef;
+      padding: 1.5rem;
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.3s ease, background-color 0.3s ease;
+      border: 2px solid transparent;
+    }
+
+  /* Mobile Money Hover Effect - Yellow */
+  .payment-option:nth-child(1):hover {
+    transform: scale(1.05);
+    background-color: yellow;
+    border-color: #17a2b8;
+  }
+
+  /* Credit/Debit Card Hover Effect - Light Green */
+  .payment-option:nth-child(2):hover {
+    transform: scale(1.05);
+    background-color: lightgreen;
+    border-color: #17a2b8;
+  }
+
+    .payment-option:hover {
+      transform: scale(1.05);
+      background-color: #ffffff;
+      border-color: #17a2b8;
+    }
+
+    .payment-option img {
+      width: 90px;
+      height: 90px;
+      margin-bottom: 0.5rem;
+    }
+
+    .payment-option span {
+      font-size: 1rem;
+      color: #495057;
+      display: block;
+      font-weight: 600;
+    }
+
+    .cta {
+      margin-top: 2rem;
+      text-align: center;
+    }
+
+    .cta button {
+      padding: 0.8rem 2rem;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .cta button:hover {
+      background-color: #0056b3;
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <div class="payment-container">
+    <div class="payment-header">
+      <h2>Select Payment Method</h2>
+      <p>Choose a payment method to complete your purchase securely.</p>
+    </div>
+    <div class="payment-options">
+      <div class="payment-option" onclick="payWithMobileMoney()">
+        <img src="images/momo.jpg" alt="Mobile Money">
+        <span>Mobile Money</span>
+      </div>
+      <div class="payment-option" onclick="payWithCreditCard()">
+        <img src="images/card.jpg" alt="Credit Card">
+        <span>Credit/Debit Card</span>
+      </div>
+    </div>
+    <div class="cta">
+
+  <script>
+    function payWithMobileMoney() {
+      window.location.href = 'Mobile Money Payment.html';
+    }
+
+    function payWithCreditCard() {
+      // Replace this alert with actual Credit/Debit Card payment integration
+      alert("Redirecting to Credit/Debit Card payment...");
+      // Example: window.location.href = 'credit-card-payment-url'; // Simulated redirection
+    }
+
+  </script>
+</body>
+</html>
