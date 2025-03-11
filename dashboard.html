@@ -721,9 +721,13 @@ async function analyzeWeevil(image) {
             body: JSON.stringify({ image: base64Image }),
         });
 
+        console.log("Response status:", response.status); // Log status
+        const responseText = await response.text();
+        console.log("Raw response:", responseText); // Log full response
+       
         if (!response.ok) throw new Error("Failed to connect to the API");
 
-        const data = await response.json();
+        const data = JSON.parse(responseText); // Parse manually
 
         if (data.predictions.length > 0) {
             drawAnnotations(data.predictions);
@@ -737,16 +741,6 @@ async function analyzeWeevil(image) {
     }
     weevilResultDiv.innerHTML = weevilResult;
     document.getElementById("loading-overlay").style.display = "none";
-}
-
-// Convert Image File to Base64
-function convertToBase64(imageFile) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(imageFile);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = (error) => reject(error);
-    });
 }
 
 async function analyzeMoisture(image) {
