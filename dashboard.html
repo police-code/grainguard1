@@ -670,8 +670,8 @@ const modelSelect = document.getElementById('model-select');
 const weevilResultDiv = document.getElementById('weevil-result');
 const moistureResultDiv = document.getElementById('moisture-result');
 
-const ROBOFLOW_API_URL = "https://detect.roboflow.com/grainguard/2?api_key=GFC3cHrlownthYDBynj6";
-
+const ROBOFLOW_API_URL = "https://detect.roboflow.com/grainguard/2";
+const API_KEY = "GFC3cHrlownthYDBynj6";
 
 let storedImageData; // Global variable to store image data
 
@@ -711,28 +711,17 @@ try {
 async function analyzeWeevil(image) {
     let weevilResult = "";
     try {
-        if (!(image instanceof File)) {
-            console.error("Image is not a valid file.");
-            return;
-        }
+        const formData = new FormData();
+        formData.append("file", image);
 
-        const base64Image = await convertToBase64(image); // Convert image to Base64
-
-        const response = await fetch(ROBOFLOW_API_URL, {
+        const response = await fetch(`${ROBOFLOW_API_URL}?api_key=${API_KEY}`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ image: base64Image }),
+            body: formData,
         });
 
-        console.log("Response status:", response.status); // Log status
-        const responseText = await response.text();
-        console.log("Raw response:", responseText); // Log full response
-       
         if (!response.ok) throw new Error("Failed to connect to the API");
 
-        const data = JSON.parse(responseText); // Parse manually
+        const data = await response.json();
 
         if (data.predictions.length > 0) {
             drawAnnotations(data.predictions);
@@ -745,7 +734,7 @@ async function analyzeWeevil(image) {
         weevilResult = "Error processing the image.";
     }
     weevilResultDiv.innerHTML = weevilResult;
-    document.getElementById("loading-overlay").style.display = "none";
+document.getElementById("loading-overlay").style.display = "none";
 }
 
 async function analyzeMoisture(image) {
@@ -824,11 +813,19 @@ function drawAnnotations(predictions) {
     });
 }
 
-        uploadImageInput.addEventListener("change", function (event) {
-    const file = event.target.files[0]; // Get the actual file object
-    storedImageData = file; // Store the file, NOT a Base64 string
-});
-
+        uploadImageInput.addEventListener("change", async (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    storedImageData = e.target.result; // Store data URL
+                    uploadedImage.src = storedImageData; //Set image source.
+            uploadedImage.onload = () => {
+                canvasOverlay.width = uploadedImage.width;
+                canvasOverlay.height = uploadedImage.height;
+            };
+            classifyImage(); // Call classifyImage without parameter
+             };
 
                 reader.readAsDataURL(file);
                 document.getElementById('camera-card').style.display = 'none';
