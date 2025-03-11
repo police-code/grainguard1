@@ -692,7 +692,8 @@ try {
     if (selectedModel === 'weevil') {
         weevilResultDiv.style.display = 'block';
         moistureResultDiv.style.display = 'none';
-        await analyzeWeevil(storedImageData);
+        const imageFile = dataURLtoFile(storedImageData, "image.png");
+        await analyzeWeevil(imageFile);
     } else if (selectedModel === 'moisture') {
         weevilResultDiv.style.display = 'none';
         moistureResultDiv.style.display = 'block';
