@@ -711,6 +711,11 @@ try {
 async function analyzeWeevil(image) {
     let weevilResult = "";
     try {
+        if (!(image instanceof File)) {
+            console.error("Image is not a valid file.");
+            return;
+        }
+
         const base64Image = await convertToBase64(image); // Convert image to Base64
 
         const response = await fetch(ROBOFLOW_API_URL, {
@@ -819,19 +824,11 @@ function drawAnnotations(predictions) {
     });
 }
 
-        uploadImageInput.addEventListener("change", async (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    storedImageData = e.target.result; // Store data URL
-                    uploadedImage.src = storedImageData; //Set image source.
-            uploadedImage.onload = () => {
-                canvasOverlay.width = uploadedImage.width;
-                canvasOverlay.height = uploadedImage.height;
-            };
-            classifyImage(); // Call classifyImage without parameter
-             };
+        uploadImageInput.addEventListener("change", function (event) {
+    const file = event.target.files[0]; // Get the actual file object
+    storedImageData = file; // Store the file, NOT a Base64 string
+});
+
 
                 reader.readAsDataURL(file);
                 document.getElementById('camera-card').style.display = 'none';
