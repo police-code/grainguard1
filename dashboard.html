@@ -897,32 +897,36 @@ function drawAnnotations(predictions) {
         }
 
         // Download button functionality
-        document.getElementById("download-btn").addEventListener("click", () => {
+        document.getElementById("download-btn").addEventListener("click", async () => {
+            if (!uploadedImage) {
+                alert("No image uploaded.");
+                return;
+            }
+
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
 
-            canvas.width = uploadedImage.width;
-            canvas.height = uploadedImage.height;
-            ctx.drawImage(uploadedImage, 0, 0, canvas.width, canvas.height);
+            const img = new Image();
+            img.src = uploadedImage.src;
+            await img.decode(); // Ensure the image is fully loaded before drawing
+
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
             // Draw bounding boxes on the canvas
-            const predictions = getPredictionsForDownload(); // Replace with actual function to fetch predictions
+            const predictions = getPredictionsForDownload();
             predictions.forEach(prediction => {
                 const { x, y, width, height, class: label, confidence } = prediction;
 
-                const scaleX = uploadedImage.width / uploadedImage.naturalWidth;
-                const scaleY = uploadedImage.height / uploadedImage.naturalHeight;
-
-                const rectX = (x - width / 2) * scaleX;
-                const rectY = (y - height / 2) * scaleY;
-                const rectWidth = width * scaleX;
-                const rectHeight = height * scaleY;
+                const rectX = x - width / 2;
+                const rectY = y - height / 2;
 
                 ctx.strokeStyle = "red";
                 ctx.lineWidth = 2;
-                ctx.strokeRect(rectX, rectY, rectWidth, rectHeight);
+                ctx.strokeRect(rectX, rectY, width, height);
 
-                ctx.font = "14px Arial";
+                ctx.font = "20px Arial";
                 ctx.fillStyle = "red";
                 ctx.fillText(`${label} (${(confidence * 100).toFixed(1)}%)`, rectX, rectY - 5);
             });
@@ -931,39 +935,19 @@ function drawAnnotations(predictions) {
             const link = document.createElement("a");
             link.href = canvas.toDataURL("image/png");
             link.download = "annotated-image.png";
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
         });
 
-        // Share button functionality
-        document.getElementById("share-btn").addEventListener("click", async () => {
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
+        function getPredictionsForDownload() {
+            // Replace with actual logic for fetching predictions
+            return [
+                { x: 100, y: 100, width: 50, height: 50, class: "Weevil", confidence: 0.9 },
+                { x: 200, y: 150, width: 40, height: 40, class: "Mold", confidence: 0.8 },
+            ];
+        }
 
-            canvas.width = uploadedImage.width;
-            canvas.height = uploadedImage.height;
-            ctx.drawImage(uploadedImage, 0, 0, canvas.width, canvas.height);
-
-            // Draw bounding boxes on the canvas
-            const predictions = getPredictionsForDownload(); // Replace with actual function to fetch predictions
-            predictions.forEach(prediction => {
-                const { x, y, width, height, class: label, confidence } = prediction;
-
-                const scaleX = uploadedImage.width / uploadedImage.naturalWidth;
-                const scaleY = uploadedImage.height / uploadedImage.naturalHeight;
-
-                const rectX = (x - width / 2) * scaleX;
-                const rectY = (y - height / 2) * scaleY;
-                const rectWidth = width * scaleX;
-                const rectHeight = height * scaleY;
-
-                ctx.strokeStyle = "red";
-                ctx.lineWidth = 2;
-                ctx.strokeRect(rectX, rectY, rectWidth, rectHeight);
-
-                ctx.font = "14px Arial";
-                ctx.fillStyle = "red";
-                ctx.fillText(`${label} (${(confidence * 100).toFixed(1)}%)`, rectX, rectY - 5);
-            });
 
             // Use the Web Share API to share the image if available
             if (navigator.canShare && navigator.canShare({ files: [new File([canvas.toDataURL("image/png")], "annotated-image.png")] })) {
