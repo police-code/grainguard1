@@ -199,8 +199,8 @@
             }
 
             try {
-                const response = await fetch('https://192.168.8.100:5000
-/api/signup', { // Corrected URL
+                const response = await fetch('https://192.168.8.100:5000/api/signup', { 
+
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, username, password }),
